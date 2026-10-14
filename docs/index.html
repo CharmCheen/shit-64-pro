@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>shit-64-pro — 你蒸馏不了神</title>
+<meta name="description" content="大型赛博永生现场：8726 条群消息 + 4792 条私聊，把刘思畅蒸馏成一个 Agent Skill。">
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --dim: #8b949e;
+    --orange: #f0883e;
+    --green: #3fb950;
+    --red: #f85149;
+    --blue: #58a6ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  a { color: var(--blue); text-decoration: none; }
+
+  /* ===== 背景野牛 ===== */
+  .bison-field { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .bison {
+    position: absolute; font-size: 28px; opacity: 0.08;
+    animation: drift linear infinite;
+  }
+  @keyframes drift {
+    from { transform: translateY(110vh) rotate(0deg); }
+    to { transform: translateY(-15vh) rotate(360deg); }
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+  /* ===== Hero ===== */
+  header { padding: 72px 0 40px; text-align: center; }
+  .hero-tag {
+    display: inline-block; font-size: 13px; color: var(--dim);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px 14px; margin-bottom: 22px; letter-spacing: 2px;
+  }
+  .glitch {
+    font-size: clamp(44px, 9vw, 96px); font-weight: 900; letter-spacing: -2px;
+    color: var(--text); position: relative; line-height: 1.1;
+    text-shadow: 0 0 30px rgba(240, 136, 62, .25);
+  }
+  .glitch::before, .glitch::after {
+    content: attr(data-text); position: absolute; inset: 0; overflow: hidden;
+  }
+  .glitch::before { color: var(--green); animation: glitch1 3.2s infinite steps(1); clip-path: inset(0 0 60% 0); }
+  .glitch::after { color: var(--red); animation: glitch2 2.7s infinite steps(1); clip-path: inset(55% 0 0 0); }
+  @keyframes glitch1 { 0%,92%{transform:none;opacity:0} 93%{transform:translate(-4px,-2px);opacity:.8} 96%{transform:translate(3px,1px);opacity:.8} 100%{opacity:0} }
+  @keyframes glitch2 { 0%,90%{transform:none;opacity:0} 91%{transform:translate(4px,2px);opacity:.8} 95%{transform:translate(-3px,-1px);opacity:.8} 100%{opacity:0} }
+  .hero-sub { margin-top: 14px; font-size: clamp(16px, 2.6vw, 22px); color: var(--dim); }
+  .hero-sub b { color: var(--orange); }
+
+  .founding-quote {
+    margin: 36px auto 8px; max-width: 640px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 22px; text-align: left; font-size: 15px;
+  }
+  .founding-quote .u { color: var(--blue); }
+  .founding-quote .h { color: var(--green); font-weight: 600; }
+  .founding-quote .who { color: var(--dim); font-size: 12px; margin-top: 10px; }
+
+  .btn-row { margin-top: 28px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-block; padding: 12px 26px; border-radius: 10px; font-weight: 700;
+    font-size: 15px; transition: transform .15s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary { background: var(--orange); color: #1a1006; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text); }
+
+  /* ===== 弹幕 ===== */
+  .marquee {
+    border-block: 1px solid var(--border); background: rgba(22,27,34,.7);
+    overflow: hidden; white-space: nowrap; padding: 10px 0; margin: 30px 0 0;
+  }
+  .marquee-inner { display: inline-block; animation: scroll 30s linear infinite; }
+  .marquee span { margin: 0 26px; color: var(--dim); font-size: 14px; }
+  .marquee b { color: var(--orange); }
+  @keyframes scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* ===== 通用 section ===== */
+  section { padding: 64px 0; }
+  h2 { font-size: 28px; margin-bottom: 8px; }
+  h2 .num { color: var(--orange); font-family: monospace; margin-right: 10px; }
+  .sec-sub { color: var(--dim); margin-bottom: 32px; font-size: 15px; }
+
+  /* ===== 数据 ===== */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; transition: border-color .2s;
+  }
+  .stat:hover { border-color: var(--orange); }
+  .stat .n { font-size: 34px; font-weight: 900; font-family: monospace; color: var(--green); }
+  .stat .l { color: var(--text); font-size: 14px; margin-top: 4px; }
+  .stat .c { color: var(--dim); font-size: 12px; margin-top: 8px; }
+
+  /* ===== 对线模拟器 ===== */
+  .chat-shell {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  }
+  .chat-head {
+    display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+    border-bottom: 1px solid var(--border); background: #1c2129;
+  }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, var(--orange), #b3591f);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .chat-head .name { font-weight: 700; }
+  .chat-head .status { font-size: 12px; color: var(--green); }
+  .chat-head .badge {
+    margin-left: auto; font-size: 11px; color: var(--dim);
+    border: 1px solid var(--border); padding: 3px 10px; border-radius: 999px;
+  }
+  .chat-body {
+    height: 380px; overflow-y: auto; padding: 18px;
+    display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth;
+  }
+  .msg { max-width: 72%; padding: 9px 14px; border-radius: 12px; font-size: 15px; white-space: pre-wrap; word-break: break-word; }
+  .msg.me { align-self: flex-end; background: #2ea04326; border: 1px solid #2ea04366; border-bottom-right-radius: 4px; }
+  .msg.him { align-self: flex-start; background: #21262d; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .msg.sys { align-self: center; color: var(--dim); font-size: 12px; background: none; border: none; }
+  .msg .em { font-size: 13px; color: var(--orange); background: #f0883e22; padding: 1px 6px; border-radius: 5px; }
+  .typing { align-self: flex-start; display: flex; gap: 4px; padding: 12px 16px; }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); animation: blink 1s infinite; }
+  .typing i:nth-child(2) { animation-delay: .18s; }
+  .typing i:nth-child(3) { animation-delay: .36s; }
+  @keyframes blink { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
+
+  .chat-input { display: flex; gap: 10px; padding: 14px 16px; border-top: 1px solid var(--border); }
+  .chat-input input {
+    flex: 1; background: #0d1117; border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); padding: 11px 14px; font-size: 15px; outline: none;
+  }
+  .chat-input input:focus { border-color: var(--orange); }
+  .chat-input button {
+    background: var(--orange); border: none; border-radius: 10px; color: #1a1006;
+    font-weight: 700; padding: 0 22px; cursor: pointer; font-size: 15px;
+  }
+  .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .preset {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    border-radius: 999px; padding: 7px 16px; font-size: 13px; cursor: pointer;
+    transition: all .15s;
+  }
+  .preset:hover { border-color: var(--orange); color: var(--orange); }
+  .chat-note { margin-top: 12px; font-size: 12px; color: var(--dim); text-align: center; }
+
+  /* ===== 模式 ===== */
+  .modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .mode { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .mode .icon { font-size: 28px; }
+  .mode h3 { margin: 10px 0 6px; font-size: 18px; }
+  .mode h3 code { color: var(--orange); background: none; font-size: 15px; }
+  .mode p { color: var(--dim); font-size: 14px; }
+  .mode .demo {
+    margin-top: 14px; background: #0d1117; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; font-family: monospace; font-size: 13px;
+  }
+  .mode .demo .in { color: var(--blue); }
+  .mode .demo .out { color: var(--green); }
+
+  /* ===== 词典 ===== */
+  .dict { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .word { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .word b { color: var(--orange); font-size: 16px; font-family: monospace; }
+  .word span { display: block; color: var(--dim); font-size: 13px; margin-top: 4px; }
+
+  /* ===== 时间线 ===== */
+  .timeline { border-left: 2px solid var(--border); margin-left: 10px; padding-left: 28px; }
+  .tl-item { position: relative; padding-bottom: 28px; }
+  .tl-item::before {
+    content: ""; position: absolute; left: -35px; top: 6px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--bg); border: 2px solid var(--orange);
+  }
+  .tl-item .t { color: var(--orange); font-family: monospace; font-size: 13px; }
+  .tl-item .d { font-size: 15px; margin-top: 2px; }
+  .tl-item .d em { color: var(--dim); font-style: normal; font-size: 13px; }
+
+  /* ===== footer ===== */
+  footer { border-top: 1px solid var(--border); padding: 40px 0 60px; text-align: center; color: var(--dim); font-size: 14px; }
+  footer .god { font-size: 20px; color: var(--text); font-weight: 700; margin-bottom: 12px; }
+  footer p { margin: 6px 0; }
+
+  @media (max-width: 640px) {
+    header { padding-top: 48px; }
+    .chat-body { height: 320px; }
+    .msg { max-width: 85%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bison-field" id="bisonField"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="hero-tag">AGENT SKILL · 赛博永生工程 · 未经本人批准</div>
+    <div class="glitch" data-text="SHIT-64-PRO">SHIT-64-PRO</div>
+    <div class="hero-sub">别人蒸馏巴菲特，我们把 <b>刘思畅</b> 蒸馏了<br>8726 条群消息 + 4792 条私聊 → 一个 skill 目录</div>
+
+    <div class="founding-quote">
+      <div class="u">我：拿来我把你的聊天记录导出来然后蒸馏了</div>
+      <div class="h">刘思畅：你蒸馏不了神</div>
+      <div class="who">—— 2026/10/14 22:47 · 本项目立项现场 · 对面当晚说「晚上github见」</div>
+    </div>
+
+    <div class="btn-row">
+      <a class="btn btn-primary" href="#duixian">🐃 在线对线</a>
+      <a class="btn btn-ghost" href="https://github.com/CharmCheen/shit-64-pro" target="_blank">GitHub 仓库</a>
+    </div>
+  </header>
+</div>
+
+<div class="marquee"><div class="marquee-inner" id="marquee"></div></div>
+
+<div class="wrap">
+
+  <section id="stats">
+    <h2><span class="num">00</span>数据画像</h2>
+    <div class="sec-sub">全部来自真实统计。他单轮中位数 8 个字——这个页面比他一年的输出都长。</div>
+    <div class="stats">
+      <div class="stat"><div class="n" data-count="8726">0</div><div class="l">群消息</div><div class="c">不喷猎鹰喷秦粪群，10 余人，含大量野牛学术研讨</div></div>
+      <div class="stat"><div class="n" data-count="4792">0</div><div class="l">私聊消息</div><div class="c">跨度 2024/7 ~ 2026/10，考研数学互助与深夜约车</div></div>
+      <div class="stat"><div class="n" data-count="8" data-suffix=" 字">0</div><div class="l">单轮中位字数</div><div class="c">p90 也才 27 字，长篇大论绝缘体</div></div>
+      <div class="stat"><div class="n">0.26%</div><div class="l">句号使用率</div><div class="c">5829 轮里 15 轮带句号，标点约等于不存在</div></div>
+      <div class="stat"><div class="n" data-count="41" data-suffix=" 秒">0</div><div class="l">回复中位延迟</div><div class="c">私聊只要 17 秒，比大部分客服都敬业</div></div>
+      <div class="stat"><div class="n">17.5%</div><div class="l">纯表情包轮占比</div><div class="c">没话说的时候就甩 [表情包]，沉默也是他</div></div>
+    </div>
+  </section>
+
+  <section id="duixian">
+    <h2><span class="num">01</span>在线对线模拟器</h2>
+    <div class="sec-sub">预设台词 100% 来自真实聊天记录（已脱敏）。注意他的回复是一条一条蹦出来的——<b style="color:var(--orange)">连发节奏</b>就是他的灵魂。</div>
+
+    <div class="chat-shell">
+      <div class="chat-head">
+        <div class="avatar">🐃</div>
+        <div>
+          <div class="name">刘思畅 <span style="color:var(--dim);font-size:12px">(尼古拉.柯围棋)</span></div>
+          <div class="status">● 永远在线 · 0点最活跃</div>
+        </div>
+        <div class="badge">蒸馏版 v1.0 · 还原度 146/150</div>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="msg sys">（以下为基于聊天记录蒸馏的刘思畅模拟，非本人——免责声明只说这一次，之后绝不营业）</div>
+      </div>
+      <div class="chat-input">
+        <input id="chatInput" type="text" placeholder="随便说点什么……（模拟器随机应答，完整版请安装 skill）" maxlength="60">
+        <button onclick="sendFree()">发送</button>
+      </div>
+    </div>
+
+    <div class="preset-row" id="presetRow"></div>
+    <div class="chat-note">自由输入框的回复从他的高频口头禅池里随机抽——毕竟静态页面装不下一个神。</div>
+  </section>
+
+  <section id="modes">
+    <h2><span class="num">02</span>三种模式</h2>
+    <div class="sec-sub">装进 Claude Code / ZCode 之后，他支持三种被使用的方式。</div>
+    <div class="modes">
+      <div class="mode">
+        <div class="icon">🎭</div>
+        <h3>roleplay <code>· 默认</code></h3>
+        <p>直接以他的身份说话。用「我」，不出戏，被损了回损。</p>
+        <div class="demo"><div class="in">&gt; 晚上有空吗，打个cs</div><div class="out">来<br>几点</div></div>
+      </div>
+      <div class="mode">
+        <div class="icon">✍️</div>
+        <h3>rewrite <code>· 改写</code></h3>
+        <p>把你写的话改成他的味儿。事实全保留，标点全删光。</p>
+        <div class="demo"><div class="in">&gt; 由于明天有组会，我今晚不能打游戏了</div><div class="out">明早组会<br>今晚打不了<br>别问</div></div>
+      </div>
+      <div class="mode">
+        <div class="icon">📊</div>
+        <h3>ask <code>· 画像</code></h3>
+        <p>第三人称回答「他是什么样的人」。只用真实统计，编不出来。</p>
+        <div class="demo"><div class="in">&gt; ask: 他平时几点在线？</div><div class="out">18点峰值602轮<br>0点还有417轮<br>2点断崖，熬不过2点</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dict">
+    <h2><span class="num">03</span>黑话词典</h2>
+    <div class="sec-sub">看不懂他在说什么？正常，我们准备了一份对照表。</div>
+    <div class="dict">
+      <div class="word"><b>野牛</b><span>CS2 冲锋枪 P90，他的本命枪，万物皆可「不如野牛」</span></div>
+      <div class="word"><b>开电</b><span>开电脑，准备上号。约车链条的第一环</span></div>
+      <div class="word"><b>41</b><span>报人数：4+1，五人车队确认完毕</span></div>
+      <div class="word"><b>ozpp / oopz</b><span>约赛黑话。发出即代表「我要开始了」</span></div>
+      <div class="word"><b>尽力了</b><span>认输/自嘲式总结。通常连打两遍</span></div>
+      <div class="word"><b>还真是</b><span>认同，略带意外。万能肯定句</span></div>
+      <div class="word"><b>各走</b><span>CS2 战术：各自走位不抱团。也是群里反讽梗「全员各走化」</span></div>
+      <div class="word"><b>唐</b><span>离谱、看不懂。一字差评，杀伤力巨大</span></div>
+      <div class="word"><b>🈚</b><span>没有。他最高频的符号回复（41 次）</span></div>
+      <div class="word"><b>[表情包]</b><span>不是敷衍，是一种完整的态度表达</span></div>
+      <div class="word"><b>牛魔</b><span>语气词。对熟人使用，不带真恶意</span></div>
+      <div class="word"><b>阿兹特克</b><span>帝国时代2 文明，他宣布过「将会制霸天梯」</span></div>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <h2><span class="num">04</span>项目时间线</h2>
+    <div class="sec-sub">从第一次私聊到「你蒸馏不了神」。</div>
+    <div class="timeline">
+      <div class="tl-item"><div class="t">2024/07/11</div><div class="d">首条私聊记录 <em>—— 谁也没想到这两万多条消息最后会变成一个 GitHub 仓库</em></div></div>
+      <div class="tl-item"><div class="t">2025/03</div><div class="d">群聊数据爆发期开始 <em>—— 野牛学、帝国学、考研数学三大学科体系成型</em></div></div>
+      <div class="tl-item"><div class="t">2026/10/14 22:47</div><div class="d">「拿来我把你的聊天记录导出来然后蒸馏了」「<b style="color:var(--orange)">你蒸馏不了神</b>」 <em>—— 立项</em></div></div>
+      <div class="tl-item"><div class="t">2026/10/14 深夜</div><div class="d">清洗 68479 条 → 352 条例证 → skill 成型 <em>—— 两轮黑盒实测 146/150 → 119/120，朋友视角：「放在群里发，我不会怀疑不是他」</em></div></div>
+      <div class="tl-item"><div class="t">今晚</div><div class="d">GitHub 见。项目名就叫大份64 <em>—— 原话如此，文学性不接受质疑</em></div></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="god">「你蒸馏不了神」——那 4 分我们承认了</div>
+    <p>群友已全部脱敏（好友A~U / 某人 / 我）· 刘思畅本人知情且在场 · 本页面句号使用量为零</p>
+    <p style="margin-top:14px"><a href="https://github.com/CharmCheen/shit-64-pro" target="_blank">GitHub</a> · <a href="https://github.com/CharmCheen/shit-64-pro#readme" target="_blank">README</a> · 本 skill 仅用于整活与怀念，不用于冒充本人开黑</p>
+    <p style="margin-top:18px;color:#484f58;font-size:12px">🐃 本页面背景飘的就是野牛。看不起野牛的人都会被 P90 制裁。</p>
+  </footer>
+
+</div>
+
+<script>
+/* ===== 背景野牛 ===== */
+(function(){
+  const field = document.getElementById('bisonField');
+  const emojis = ['🐃','🐃','🐃','🎮','👑','🈚','🐸'];
+  for (let i = 0; i < 18; i++) {
+    const b = document.createElement('div');
+    b.className = 'bison';
+    b.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    b.style.left = Math.random()*100 + 'vw';
+    b.style.animationDuration = (14 + Math.random()*20) + 's';
+    b.style.animationDelay = (-Math.random()*30) + 's';
+    b.style.fontSize = (18 + Math.random()*26) + 'px';
+    field.appendChild(b);
+  }
+})();
+
+/* ===== 弹幕 ===== */
+(function(){
+  const quotes = [
+    '<b>你蒸馏不了神</b>','来 几点','开电','尽力了尽力了','还真是','41','ozpp','不如野牛',
+    '看不起野牛的人都会被p90制裁','我宣布阿兹特克将会制霸天梯','没事的，枪软软的也没关系',
+    '大家都是好人 而你是坏人','？','干嘛','牛魔','🈚','[表情包]','顺从','网图','再来一把'
+  ];
+  const inner = document.getElementById('marquee');
+  const html = quotes.map(q => '<span>' + q + '</span>').join('·');
+  inner.innerHTML = html + html; // 复制一份实现无缝滚动
+})();
+
+/* ===== 数字滚动（IntersectionObserver 触发；后台节流环境用定时器兜底） ===== */
+(function(){
+  const els = document.querySelectorAll('[data-count]');
+  const started = new WeakSet();
+  const animate = (el) => {
+    if (started.has(el)) return;
+    started.add(el);
+    const target = +el.dataset.count, suf = el.dataset.suffix || '';
+    const t0 = performance.now(), dur = 1200;
+    let done = false;
+    const render = p => { el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString() + suf; };
+    const finish = () => { if (!done) { done = true; render(1); } };
+    // rAF 被暂停的環境（后台标签）用 setTimeout 驱动；两边都跑，先完成者生效
+    const tick = t => {
+      if (done) return;
+      const p = Math.min((t - t0) / dur, 1);
+      render(p);
+      if (p < 1) { requestAnimationFrame(tick); setTimeout(() => tick(performance.now()), 30); }
+      else done = true;
+    };
+    requestAnimationFrame(tick);
+    setTimeout(() => tick(performance.now()), 30);
+    setTimeout(finish, dur + 800); // 兜底终值
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { animate(e.target); io.unobserve(e.target); } });
+    }, { threshold: .1 });
+    els.forEach(el => io.observe(el));
+  }
+  // 兜底：IO 被暂停/不触发时，滚到附近或超时后直接出数
+  const fallback = () => els.forEach(el => animate(el));
+  const onScroll = () => {
+    for (const el of els) {
+      const r = el.getBoundingClientRect();
+      if (r.top < innerHeight && r.bottom > 0) animate(el);
+    }
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  setTimeout(fallback, 3000); // 最迟 3 秒后全部出数（可见环境动画早完成了）
+})();
+
+/* ===== 对线模拟器 ===== */
+const chatBody = document.getElementById('chatBody');
+
+function addMsg(cls, text) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + cls;
+  // 表情码高亮
+  div.innerHTML = text.replace(/\[([^\]\n]{1,6})\]/g, '<span class="em">[$1]</span>');
+  chatBody.appendChild(div);
+  chatBody.scrollTop = chatBody.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const t = document.createElement('div');
+  t.className = 'msg him typing'; t.id = 'typing';
+  t.innerHTML = '<i></i><i></i><i></i>';
+  chatBody.appendChild(t);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+function hideTyping() { document.getElementById('typing')?.remove(); }
+
+// 他连发：一条一条蹦，间隔 450ms，每条前先 typing 300ms
+async function heSays(lines) {
+  for (const line of lines) {
+    showTyping();
+    await new Promise(r => setTimeout(r, 380));
+    hideTyping();
+    addMsg('him', line);
+    await new Promise(r => setTimeout(r, 220));
+  }
+}
+
+const PRESETS = [
+  { q: '晚上有空吗，打个cs', a: ['来','几点','喊到几个了'] },
+  { q: '你考研准备得怎么样了', a: ['?','考完了啊','都研一了'] },
+  { q: '听说你被做成AI了？', a: ['你蒸馏不了神','它会开野牛吗'] },
+  { q: '我今天面试被刷了，有点难受', a: ['没事','晚上cs吗'] },
+  { q: '哈哈哈你也太菜了吧，昨天那把0-8', a: ['?','尽力了尽力了','0-8怎么了'] },
+  { q: '帮我写段生日祝福，给我最好的朋友', a: ['这也要人写','[表情包]','生日快乐兄弟','把把0杀'] },
+  { q: '帝国玩什么文明？我一直玩匈奴', a: ['匈奴？','我挺阿兹特克','我宣布阿兹特克将会制霸天梯'] },
+  { q: '凌晨一点了，睡了吗', a: ['才一点','干嘛'] },
+  { q: '野牛不是娱乐枪吗', a: ['看不起野牛的人都会被p90制裁','不如满改野牛'] },
+];
+
+const presetRow = document.getElementById('presetRow');
+let busy = false;
+PRESETS.forEach(p => {
+  const btn = document.createElement('button');
+  btn.className = 'preset';
+  btn.textContent = p.q;
+  btn.onclick = () => talk(p.q, p.a);
+  presetRow.appendChild(btn);
+});
+
+async function talk(q, a) {
+  if (busy) return; busy = true;
+  addMsg('me', q);
+  await new Promise(r => setTimeout(r, 500));
+  await heSays(a);
+  busy = false;
+}
+
+// 自由输入：从口头禅池随机（静态页面的尊严）
+const POOL = [
+  ['?'],['干嘛'],['还真是'],['1'],['[表情包]'],['牛魔'],
+  ['？','啥啊'],['来','几点'],['尽力了尽力了'],['顺从'],
+  ['网图'],['唐'],['开电'],['？','你在干嘛'],['不如野牛'],
+];
+
+function sendFree() {
+  const input = document.getElementById('chatInput');
+  const v = input.value.trim();
+  if (!v || busy) return;
+  input.value = '';
+  talk(v, POOL[Math.floor(Math.random()*POOL.length)]);
+}
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendFree();
+});
+
+// 开场：页面加载后他自己先蹦一句
+setTimeout(() => heSays(['？','怎么进来的']), 900);
+</script>
+</body>
+</html>

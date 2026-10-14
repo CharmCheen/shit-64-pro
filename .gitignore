@@ -1,0 +1,13 @@
+# ===== 隐私红线：以下目录含未脱敏聊天数据 / 反向映射表，绝不入库 =====
+data/
+output/
+refe_repos/
+
+# 本地工具目录
+.zcode/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+node_modules/
+*.log
