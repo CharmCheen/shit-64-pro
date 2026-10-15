@@ -20,7 +20,7 @@ const mine = [...group, ...priv].filter(t => t.senderId === TARGET_ID).sort((a, 
 
 // ---- 基础量 ----
 const nTextTurns = mine.filter(t => t.nSticker === 0).length;
-const nStickerOnly = mine.filter(t => t.nSticker > 0 && t.text.replace(/\[表情包\]/g, '').trim() === '').length;
+const nStickerOnly = mine.filter(t => t.nSticker > 0 && t.text.replace(/\[表情包[^\]]*\]/g, '').trim() === '').length;
 const allChars = mine.reduce((s, t) => s + t.text.length, 0);
 const lens = mine.map(t => t.text.length).sort((a, b) => a - b);
 const pct = q => lens[Math.floor(lens.length * q)];
@@ -41,17 +41,18 @@ const bar = (arr, labels) => {
 
 // ---- 口头禅：高频整句 / 高频2-gram ----
 const phraseCnt = {};
+const PLACEHOLDER_RE = /\[(图片|视频|语音|文件|链接|转发|分享消息|表情包)/;
 for (const t of mine) {
   if (t.nSticker > 0) continue;
   const key = t.text.replace(/\s+/g, '');
-  if (key.length >= 2 && key.length <= 8) phraseCnt[key] = (phraseCnt[key] || 0) + 1;
+  if (key.length >= 2 && key.length <= 8 && !PLACEHOLDER_RE.test(key)) phraseCnt[key] = (phraseCnt[key] || 0) + 1;
 }
 const topPhrases = Object.entries(phraseCnt).filter(([, c]) => c >= 8).sort((a, b) => b[1] - a[1]).slice(0, 40);
 
 const STOP = new Set('的了是不我你他她它啊呢吧嘛呀哦哈嗯呃也就在有和跟对说要去好这样那什么没有都还很更太真的会能行来看想去点个只又又被把让给他她你我们你们他们'.split('').concat(['一个','什么','没有','不是','就是','这个','那个','现在','知道','时候','感觉','然后','已经','自己','因为','所以','但是','可以','这个']));
 const biCnt = {};
 for (const t of mine) {
-  const s = t.text.replace(/\[[^\]]{1,6}\]|@\S+|[^\u4e00-\u9fa5]+/g, '');
+  const s = t.text.replace(/\[[^\]]{1,20}\]|@\S+|[^\u4e00-\u9fa5]+/g, '');
   for (let i = 0; i + 1 < s.length; i++) {
     const bi = s.slice(i, i + 2);
     if (STOP.has(bi[0]) || STOP.has(bi[1])) continue;
@@ -62,13 +63,18 @@ const topBigrams = Object.entries(biCnt).filter(([, c]) => c >= 10).sort((a, b) 
 
 // ---- 微信表情码 ----
 const emoCnt = {};
-for (const t of mine) for (const m of t.text.matchAll(/\[([^\[\]]{1,8})\]/g)) emoCnt[m[1]] = (emoCnt[m[1]] || 0) + 1;
+for (const t of mine) for (const m of t.text.matchAll(/\[([^\[\]]{1,8})\]/g)) {
+  if (/^(表情包|图片|视频|语音|文件|链接|转发|分享消息)/.test(m[1])) continue; // 占位符不是表情码
+  emoCnt[m[1]] = (emoCnt[m[1]] || 0) + 1;
+}
 const topEmo = Object.entries(emoCnt).sort((a, b) => b[1] - a[1]).slice(0, 15);
 
 // ---- 表情包 top ----
-const stickerCnt = {};
-for (const t of mine) if (t.nSticker > 0) for (const m of t.text.matchAll(/\[表情包\]/g)) { /* 仅计数 */ }
-// md5 在清洗时存于 turn? 清洗版只留文本，重新从原始档案取 md5 top
+// v2: md5 → 视觉命名的语义名（output/sticker_names.json）
+let stickerNameMap = {};
+try {
+  stickerNameMap = JSON.parse(fs.readFileSync(path.join(ROOT, 'output/sticker_names.json'), 'utf8'));
+} catch { /* 无命名表时退回 md5 展示 */ }
 function loadRawStickers(rel) {
   const raw = fs.readFileSync(path.join(ROOT, rel), 'utf8');
   const json = JSON.parse(raw.slice(raw.indexOf('=') + 1).trim().replace(/;\s*$/, ''));
@@ -81,8 +87,13 @@ function loadRawStickers(rel) {
   }
   return cnt;
 }
-const stCnt = { ...loadRawStickers('data/不喷猎鹰喷秦粪群_聊天档案/data/messages.js'), ...loadRawStickers('data/刘思畅_聊天档案/data/messages.js') };
-const topStickers = Object.entries(stCnt).sort((a, b) => b[1] - a[1]).slice(0, 10);
+// v2: 群/私两份计数按 md5 求和（对象展开会互相覆盖，v1 画像「39 次」bug 的根源）
+const stCnt = loadRawStickers('data/不喷猎鹰喷秦粪群_聊天档案/data/messages.js');
+for (const [k, v] of Object.entries(loadRawStickers('data/刘思畅_聊天档案/data/messages.js'))) {
+  stCnt[k] = (stCnt[k] || 0) + v;
+}
+const topStickers = Object.entries(stCnt).sort((a, b) => b[1] - a[1]).slice(0, 10)
+  .map(([k, c]) => [stickerNameMap[k] ? `${stickerNameMap[k]}` : k.slice(0, 16) + '…', c]);
 
 // ---- 回复速度：上一轮(任何人)到我发言的间隔 ----
 const latencies = [];
@@ -111,16 +122,23 @@ function quoteRate(rel) {
 }
 const qrG = quoteRate('data/不喷猎鹰喷秦粪群_聊天档案/data/messages.js');
 
-// ---- 随机样例 ----
+// ---- 随机样例（脱敏后输出，与 05_curate_examples 同规则）----
+let DEID = { byName: {}, extraAliases: {} };
+try { DEID = JSON.parse(fs.readFileSync(path.join(ROOT, 'output/deidentify_map.json'), 'utf8')); } catch { /* 无映射表时按原文输出 */ }
+function deidentify(s) {
+  const names = Object.keys(DEID.byName || {}).concat(Object.keys(DEID.extraAliases || {})).sort((a, b) => b.length - a.length);
+  for (const n of names) s = s.split(n).join(DEID.byName[n] || DEID.extraAliases[n]);
+  return s;
+}
 const pick = (arr, n) => [...arr].sort(() => Math.random() - 0.5).slice(0, n);
 const samples = pick(mine.filter(t => t.text.length >= 4 && t.text.length <= 60 && !t.text.startsWith('「')), 40)
-  .map(t => `- ${new Date(t.ts * 1000).toLocaleString('zh-CN', { hour12: false })} [${t.source === 'group' ? '群' : '私'}] ${t.text.replace(/\n/g, ' ⏎ ')}`);
+  .map(t => `- ${new Date(t.ts * 1000).toLocaleString('zh-CN', { hour12: false })} [${t.source === 'group' ? '群' : '私'}] ${deidentify(t.text).replace(/\n/g, ' ⏎ ')}`);
 
 const fmtDate = ts => new Date(ts * 1000).toLocaleDateString('zh-CN');
 const span = `${fmtDate(mine[0].ts)} ~ ${fmtDate(mine[mine.length - 1].ts)}`;
 const months = Object.entries(monthCnt).sort();
 
-const md = `# 刘思畅（wxid_al3go0glw03v22，群名片「尼古拉.柯围棋」）人物画像报告
+const md = `# 刘思畅人物画像报告
 
 > 数据：群聊「不喷猎鹰喷秦粪群」+ 私聊档案，发言跨度 ${span}。
 
@@ -152,10 +170,10 @@ ${topBigrams.map(([s, c]) => `**${s}**×${c}`).join('　')}
 ## 六、微信表情码 top
 ${topEmo.map(([s, c]) => `[${s}]×${c}`).join('　')}
 
-## 七、常用表情包 top10（按 md5）
-| 次数 | md5 |
+## 七、常用表情包 top10（视觉命名，未命名为 md5）
+| 次数 | 表情包 |
 |---|---|
-${topStickers.map(([k, c]) => `| ${c} | \`${k.slice(0, 16)}…\` |`).join('\n')}
+${topStickers.map(([k, c]) => `| ${c} | ${k.replace(/\|/g, '/')} |`).join('\n')}
 
 ## 八、回复速度（对上一条他人消息）
 中位数 ${latPct(0.5)} 秒，p90 ${latPct(0.9)} 秒 —— ${latPct(0.5) < 60 ? '跟得非常紧' : '节奏正常'}
