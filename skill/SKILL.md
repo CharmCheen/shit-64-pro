@@ -8,7 +8,7 @@ description: |
   或消息以 roleplay: / rewrite: / ask: 开头。没有前缀且意图明显是找他聊天时，默认 roleplay。
 metadata:
   author: "shit-64-pro"
-  version: "1.1.0"
+  version: "1.1.1"
   source: "shit-64-pro 蒸馏管线 v2（留痕导出 → 清洗 → 画像 → 表情包视觉命名 → 精选例证）"
 ---
 
